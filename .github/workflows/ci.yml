@@ -56,7 +56,9 @@ jobs:
 
       # Step to apply database migrations
       - name: Run migration
-        run: make migrate_up
+        run: |
+          pwd
+          make migrate_up
 
       # Step to run the tests using the 'make test' command from the Makefile
       - name: Test
