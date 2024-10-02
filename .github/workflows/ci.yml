@@ -41,10 +41,17 @@ jobs:
         with:
           go-version: ^1.15
         id: go
-
+ 
       # Step to check out the source code from the repository
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
+
+      # Step to install golang-migrate
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.darwin-amd64.tar.gz | tar xvz
+          sudo mv migrate.linux-amd64 /usr/bin/
+          which migrate
 
       # Step to apply database migrations
       - name: Run migration
