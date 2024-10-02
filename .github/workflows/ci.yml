@@ -13,8 +13,6 @@ jobs:
   Running-test:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
-    # Docker Hub image that `Running-` executes in
-    container: node:20-bookworm-slim
 
     # Service containers to run with `container-job`
     services:
@@ -27,6 +25,9 @@ jobs:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: simple_bank
+        # Expose port 5432
+        ports:
+          - 5432:5432
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -50,7 +51,7 @@ jobs:
       - name: Install golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.darwin-amd64.tar.gz | tar xvz
-          sudo mv migrate.linux-amd64 /usr/bin/
+          sudo mv migrate.linux-amd64 /usr/bin/migrate
           which migrate
 
       # Step to apply database migrations
