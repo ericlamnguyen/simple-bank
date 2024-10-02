@@ -50,15 +50,13 @@ jobs:
       # Step to install golang-migrate
       - name: Install golang-migrate
         run: |
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.darwin-amd64.tar.gz | tar xvz
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate /usr/bin/
           which migrate
 
       # Step to apply database migrations
       - name: Run migration
-        run: |
-          pwd
-          make migrate_up
+        run: make migrate_up
 
       # Step to run the tests using the 'make test' command from the Makefile
       - name: Test
