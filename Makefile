@@ -29,3 +29,7 @@ sqlc:
 test:
 	go test -v -cover ./...
 .PHONY: test
+
+start_server:
+	go run main.go
+.PHONY: start_server
