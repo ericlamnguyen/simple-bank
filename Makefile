@@ -30,6 +30,6 @@ test:
 	go test -v -cover ./...
 .PHONY: test
 
-start_server:
+server_start:
 	go run main.go
-.PHONY: start_server
+.PHONY: server_start
