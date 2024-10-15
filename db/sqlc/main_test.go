@@ -11,7 +11,7 @@ import (
 )
 
 var testQueries *Queries
-var testStore *Store
+var testStore Store
 
 // TestMain is the main entry point for the tests in this package.
 func TestMain(m *testing.M) {

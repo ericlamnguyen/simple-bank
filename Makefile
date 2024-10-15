@@ -33,3 +33,7 @@ test:
 server_start:
 	go run main.go
 .PHONY: server_start
+
+mockgen:
+	mockgen -package mockdb -destination db/mock/store.go github.com/ericlamnguyen/simple-bank/db/sqlc Store
+.PHONY: mockgen
