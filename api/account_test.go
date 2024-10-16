@@ -43,7 +43,7 @@ func TestGetAccountAPI(t *testing.T) {
 				requireBodyMatchAccount(t, rr.Body, account)
 			},
 		},
-		// test 2 - requested account not found
+		// test 2 - requested account not found in db
 		{
 			testName:  "NotFound",
 			accountID: account.ID,
@@ -54,8 +54,8 @@ func TestGetAccountAPI(t *testing.T) {
 					Return(db.Account{}, sql.ErrNoRows)
 			},
 			checkResponse: func(t *testing.T, rr *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, rr.Code)
-				requireBodyMatchAccount(t, rr.Body, account)
+				require.Equal(t, http.StatusNotFound, rr.Code)
+				requireBodyMatchAccount(t, rr.Body, db.Account{})
 			},
 		},
 	}
