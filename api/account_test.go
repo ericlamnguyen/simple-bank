@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,34 +21,78 @@ import (
 func TestGetAccountAPI(t *testing.T) {
 	account := randomAccount()
 
-	// create mock object for Store interface
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	// create table-driven test suite
+	testCases := []struct {
+		testName      string
+		accountID     int64
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, rr *httptest.ResponseRecorder)
+	}{
+		// test 1 - successful request
+		{
+			testName:  "OK",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, rr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, rr.Code)
+				requireBodyMatchAccount(t, rr.Body, account)
+			},
+		},
+		// test 2 - requested account not found
+		{
+			testName:  "NotFound",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(db.Account{}, sql.ErrNoRows)
+			},
+			checkResponse: func(t *testing.T, rr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, rr.Code)
+				requireBodyMatchAccount(t, rr.Body, account)
+			},
+		},
+	}
 
-	mockedStore := mockdb.NewMockStore(ctrl)
-	mockedStore.EXPECT().
-		GetAccount(gomock.Any(), gomock.Eq(account.ID)).
-		Times(1).
-		Return(account, nil)
+	// run the test suite
+	for i := range testCases {
+		tc := testCases[i]
 
-	// start test server and send request
-	testServer := NewServer(mockedStore)
+		t.Run(tc.testName, func(t *testing.T) {
+			// Create a new mock controller to manage the lifecycle of mocks during the test
+			ctrl := gomock.NewController(t)
+			// Ensure that the mocks are validated and any expected calls are checked after the test
+			defer ctrl.Finish()
 
-	// create new request
-	url := fmt.Sprintf("/accounts/%d", account.ID)
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+			// create mock object for Store interface
+			mockedStore := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(mockedStore)
 
-	// Create a ResponseRecorder to record the response
-	// httptest.ResponseRecorder implements the http.ResponseWriter
-	rr := httptest.NewRecorder()
+			// start test server
+			testServer := NewServer(mockedStore)
 
-	// send request through router and record the response in recorder
-	testServer.router.ServeHTTP(rr, request)
+			// create new request
+			url := fmt.Sprintf("/accounts/%d", account.ID)
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
 
-	// check the response
-	require.Equal(t, http.StatusOK, rr.Code)
-	requireBodyMatchAccount(t, rr.Body, account)
+			// Create a ResponseRecorder to record the response
+			// httptest.ResponseRecorder implements the http.ResponseWriter
+			rr := httptest.NewRecorder()
+
+			// send request through router and record the response in recorder
+			testServer.router.ServeHTTP(rr, request)
+
+			// check the response
+			tc.checkResponse(t, rr)
+		})
+	}
 }
 
 // Create a random account for testing
