@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test getAccount using mocking
+// Test Server.getAccount method using mocking
 func TestGetAccountAPI(t *testing.T) {
 	account := randomAccount()
 
@@ -58,6 +58,34 @@ func TestGetAccountAPI(t *testing.T) {
 				requireBodyMatchAccount(t, rr.Body, db.Account{})
 			},
 		},
+		// test 3 - server internal error encountered
+		{
+			testName:  "InternalError",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(db.Account{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, rr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, rr.Code)
+				requireBodyMatchAccount(t, rr.Body, db.Account{})
+			},
+		},
+		// test 4 - invalid parameters
+		{
+			testName:  "InvalidID",
+			accountID: 0,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, rr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, rr.Code)
+			},
+		},
 	}
 
 	// run the test suite
@@ -78,7 +106,7 @@ func TestGetAccountAPI(t *testing.T) {
 			testServer := NewServer(mockedStore)
 
 			// create new request
-			url := fmt.Sprintf("/accounts/%d", account.ID)
+			url := fmt.Sprintf("/accounts/%d", tc.accountID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -95,7 +123,7 @@ func TestGetAccountAPI(t *testing.T) {
 	}
 }
 
-// Create a random account for testing
+// helper function to Create a random account for testing
 func randomAccount() db.Account {
 	return db.Account{
 		ID:       util.RandomInt(1, 1000),
@@ -105,7 +133,7 @@ func randomAccount() db.Account {
 	}
 }
 
-// verify response body matches with account object
+// helper function to verify response body matches with account object
 func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)

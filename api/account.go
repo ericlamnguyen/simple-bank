@@ -49,6 +49,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 
 	// Validate the input
 	if err := ctx.ShouldBindUri(&req); err != nil {
+		// error - invalid input
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -56,15 +57,17 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	// Handle the request
 	account, err := server.store.GetAccount(ctx, req.ID)
 	if err != nil {
+		// error - no account found
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-
+		// error - general server error
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	// success
 	ctx.JSON(http.StatusOK, account)
 }
 
