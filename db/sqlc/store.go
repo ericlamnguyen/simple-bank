@@ -14,8 +14,8 @@ type Store interface {
 
 // SQLStore struct provides all functions to execute SQL queries and transactions
 type SQLStore struct {
-	*Queries
 	db *sql.DB
+	*Queries
 }
 
 // Constructor for Store struct

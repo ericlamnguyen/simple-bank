@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler function to create new account
+// create new account handler function
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -39,7 +39,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, account)
 }
 
-// Handler function to get account by id
+// get account by ID handler function
 type getAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
@@ -71,7 +71,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, account)
 }
 
-// Handler function to list accounts
+// list accounts handler function
 type listAccountRequest struct {
 	Owner    string `form:"owner" binding:"required"`
 	PageID   int32  `form:"page_id" binding:"required,min=1"`
