@@ -18,9 +18,17 @@ migrate_up:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
 .PHONY: migrate_up
 
+migrate_up_1:
+	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+.PHONY: migrate_up_1
+
 migrate_down:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 .PHONY: migrate_down
+
+migrate_down_1:
+	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+.PHONY: migrate_down_1
 
 sqlc:
 	sqlc generate
