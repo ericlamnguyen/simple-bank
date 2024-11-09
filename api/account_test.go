@@ -103,7 +103,7 @@ func TestGetAccountAPI(t *testing.T) {
 			tc.buildStubs(mockedStore)
 
 			// start test server
-			testServer := NewServer(mockedStore)
+			testServer := newTestServer(t, mockedStore)
 
 			// create new request
 			url := fmt.Sprintf("/accounts/%d", tc.accountID)

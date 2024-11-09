@@ -1,7 +1,11 @@
 package api
 
 import (
+	"fmt"
+
 	db "github.com/ericlamnguyen/simple-bank/db/sqlc"
+	"github.com/ericlamnguyen/simple-bank/token"
+	"github.com/ericlamnguyen/simple-bank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -9,21 +13,40 @@ import (
 
 // Server serves HTTP requests for banking services
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
 // NewServer creates a new HTTP server and setup routings
-func NewServer(store db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+	// Create a new PASETO token maker to create and verify PASETO tokens
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker %w", err)
+	}
 
-	// Add route handlers
-	router := gin.Default()
+	// Create Server object
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
 
 	// Register additional parameter validator with gin
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency) // ensure only supported currency is allowed
 	}
+
+	// Attach router to server
+	server.setupRouter()
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
+	// Add route handlers
+	router := gin.Default()
 
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getAccount)
@@ -32,11 +55,10 @@ func NewServer(store db.Store) *Server {
 	router.POST("/transfers", server.createTransfer)
 
 	router.POST("/users", server.createUser)
+	router.POST("users/login", server.loginUser)
 
 	// Attach router to server
 	server.router = router
-
-	return server
 }
 
 // Run the HTTP server on a specific address
