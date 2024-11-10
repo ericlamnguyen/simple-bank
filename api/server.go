@@ -52,13 +52,13 @@ func (server *Server) setupRouter() {
 	router.POST("users/login", server.loginUser)
 
 	// The following endpoints require authMiddleware
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	// router := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	authRoutes.POST("/accounts", server.createAccount)
-	authRoutes.GET("/accounts/:id", server.getAccount)
-	authRoutes.GET("/accounts", server.listAccount)
+	router.POST("/accounts", authMiddleware(server.tokenMaker), server.createAccount)
+	router.GET("/accounts/:id", authMiddleware(server.tokenMaker), server.getAccount)
+	router.GET("/accounts", authMiddleware(server.tokenMaker), server.listAccount)
 
-	authRoutes.POST("/transfers", server.createTransfer)
+	router.POST("/transfers", authMiddleware(server.tokenMaker), server.createTransfer)
 
 	// Attach router to server
 	server.router = router
