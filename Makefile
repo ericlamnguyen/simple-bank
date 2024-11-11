@@ -1,21 +1,21 @@
 start_postgres_container:
-	docker run -d --name postgres14 --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret postgres:14-alpine
+	docker run -d --name postgres --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret postgres:14-alpine
 .PHONY: start_postgres_container
 
 start_simple_bank_container:
-	docker run --name simple_bank --network bank-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgres://root:secret@postgres14:5432/simple_bank?sslmode=disable" simple_bank:latest
+	docker run --name simple_bank --network bank-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgres://root:secret@postgres:5432/simple_bank?sslmode=disable" simple_bank:latest
 .PHONY: start_simple_bank_container
 
 connect_postgres_container:
-	docker exec -it postgres14 /bin/sh
+	docker exec -it postgres /bin/sh
 .PHONY: connect_postgres_container
 
 create_db_simple_bank:
-	docker exec -it postgres14 createdb --username=root --owner=root simple_bank
+	docker exec -it postgres createdb --username=root --owner=root simple_bank
 .PHONY: create_db_simple_bank
 
 drop_db_simple_bank:
-	docker exec -it postgres14 dropdb simple_bank
+	docker exec -it postgres dropdb simple_bank
 .PHONY: drop_db_simple_bank
 
 migrate_up:
