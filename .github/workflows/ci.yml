@@ -60,5 +60,5 @@ jobs:
 
       # Step to run the tests using the 'make test' command from the Makefile
       - name: Test
-        run: make test
+        run: make test_ignore_cache
 

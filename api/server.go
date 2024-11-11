@@ -13,10 +13,10 @@ import (
 
 // Server serves HTTP requests for banking services
 type Server struct {
-	config     util.Config
-	store      db.Store
-	tokenMaker token.Maker
-	router     *gin.Engine
+	config     util.Config // object to store environment variables loaded from app.env during runtime
+	store      db.Store    // object to make db calls
+	tokenMaker token.Maker // object to create and verify access tokens
+	router     *gin.Engine // object to map endpoints with middleware and handler functions
 }
 
 // NewServer creates a new HTTP server and setup routings

@@ -1,18 +1,18 @@
-start_postgres_instance:
-	docker run --name postgres14 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:14-alpine
-.PHONY: start_postgres_instance
+start_postgres_container:
+	docker run -d --name postgres14 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret postgres:14-alpine
+.PHONY: start_postgres_container
 
-connect_postgres_instance:
+connect_postgres_container:
 	docker exec -it postgres14 /bin/sh
-.PHONY: connect_postgres_instance
+.PHONY: connect_postgres_container
 
-create_db:
+create_db_simple_bank:
 	docker exec -it postgres14 createdb --username=root --owner=root simple_bank
-.PHONY: create_db
+.PHONY: create_db_simple_bank
 
-drop_db:
+drop_db_simple_bank:
 	docker exec -it postgres14 dropdb simple_bank
-.PHONY: drop_db
+.PHONY: drop_db_simple_bank
 
 migrate_up:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
@@ -35,8 +35,16 @@ sqlc:
 .PHONY: sqlc
 
 test:
-	go test -v -cover ./...
+	go test ./...
 .PHONY: test
+
+test_ignore_cache:
+	go test -count=1 ./...
+.PHONY: test_ignore_cache
+
+test_with_coverage:
+	go test -v -cover ./...
+.PHONY: test_with_coverage
 
 server_start:
 	go run main.go
