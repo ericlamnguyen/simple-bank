@@ -5,4 +5,4 @@ echo "run db migration"
 /app/migrate -path /app/migration -database "${DB_SOURCE}" -verbose up
 
 echo "start the app"
-exec "$@" # execute the command provided in CMD of the Dockerfile
+exec "$@" # execute the command provided in CMD of the Dockerfile or the command attribute in docker-compose.yaml
