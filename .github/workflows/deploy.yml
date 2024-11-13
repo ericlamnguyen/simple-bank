@@ -7,6 +7,13 @@ on:
   push:
     branches: [ "master" ]
 
+# Permissions needed for this workflow
+permissions:
+  # The 'id-token' permission is required to authenticate with OIDC (OpenID Connect)
+  id-token: write
+  # The 'contents: read' permission allows actions to read repository content
+  contents: read
+
 jobs:
   build:
     name: Build and publish image to AWS
