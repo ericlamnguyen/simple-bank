@@ -63,7 +63,7 @@ mockgen:
 .PHONY: mockgen
 
 generate_32_byte_symmetric_key:
-	openssl rand -base64 32
+	openssl rand -hex 16
 .PHONY: generate_32_byte_symmetric_key
 
 retrieve_aws_secrets:
