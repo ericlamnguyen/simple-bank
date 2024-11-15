@@ -69,3 +69,7 @@ generate_32_byte_symmetric_key:
 retrieve_aws_secrets:
 	aws secretsmanager get-secret-value --secret-id simple_bank --query SecretString --output text | jq --raw-output 'to_entries|map("\(.key)=\(.value)")|.[]'
 .PHONY: retrieve_aws_secrets
+
+docker_login_to_ECR:
+	aws ecr get-login-password | docker login --username AWS --password-stdin 273354660396.dkr.ecr.us-east-1.amazonaws.com
+.PHONY: docker_login_to_ECR
