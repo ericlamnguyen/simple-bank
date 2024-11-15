@@ -13,7 +13,7 @@ type Config struct {
 	DBSource            string        `mapstructure:"DB_SOURCE"`
 	ServerAddr          string        `mapstructure:"SERVER_ADDR"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DRUATION"`
+	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 // LoadConfig reads configuration file or environment variables

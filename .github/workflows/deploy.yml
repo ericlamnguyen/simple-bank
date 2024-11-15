@@ -10,6 +10,7 @@ on:
 # Permissions needed for this workflow
 permissions:
   # The 'id-token' permission is required to authenticate with OIDC (OpenID Connect)
+  # It lets GitHub issue a short-lived token that can be verified by AWS to assume an IAM role
   id-token: write
   # The 'contents: read' permission allows actions to read repository content
   contents: read
@@ -32,6 +33,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Load secrets from AWS Secret Manager and save to app.env
+        run: aws secretsmanager get-secret-value --secret-id simple_bank --query SecretString --output text | jq --raw-output 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
+          
       - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}

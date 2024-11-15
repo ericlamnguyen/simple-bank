@@ -1,12 +1,12 @@
-start_postgres_container:
+start_local_postgres_container:
 	docker run -d --name postgres --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret postgres:14-alpine
 .PHONY: start_postgres_container
 
-start_simple_bank_container:
+start_local_simple_bank_container:
 	docker run --name simple_bank --network bank-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgres://root:secret@postgres:5432/simple_bank?sslmode=disable" simple_bank:latest
 .PHONY: start_simple_bank_container
 
-connect_postgres_container:
+connect_local_postgres_container:
 	docker exec -it postgres /bin/sh
 .PHONY: connect_postgres_container
 
@@ -22,29 +22,29 @@ migrate_up:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
 .PHONY: migrate_up
 
-migrate_up_1:
-	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
-.PHONY: migrate_up_1
-
 migrate_down:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 .PHONY: migrate_down
+
+migrate_up_1:
+	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+.PHONY: migrate_up_1
 
 migrate_down_1:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 .PHONY: migrate_down_1
 
-sqlc:
-	sqlc generate
-.PHONY: sqlc
+rds_migrate_up:
+	migrate -path ./db/migration -database "postgres://root:b9b0m5srSGUsxuHnc7dk@simple-bank.cjowecmmsznh.us-east-1.rds.amazonaws.com:5432/simple_bank" -verbose up
+.PHONY: rds_migrate_up
+
+rds_migrate_down:
+	migrate -path ./db/migration -database "postgres://root:b9b0m5srSGUsxuHnc7dk@simple-bank.cjowecmmsznh.us-east-1.rds.amazonaws.com:5432/simple_bank" -verbose down
+.PHONY: rds_migrate_down
 
 test:
-	go test ./...
-.PHONY: test
-
-test_ignore_cache:
 	go test -count=1 ./...
-.PHONY: test_ignore_cache
+.PHONY: test
 
 test_with_coverage:
 	go test -count=1 -v -cover ./...
@@ -54,6 +54,18 @@ server_start:
 	go run main.go
 .PHONY: server_start
 
+sqlc:
+	sqlc generate
+.PHONY: sqlc
+
 mockgen:
 	mockgen -package mockdb -destination db/mock/store.go github.com/ericlamnguyen/simple-bank/db/sqlc Store
 .PHONY: mockgen
+
+generate_32_byte_symmetric_key:
+	openssl rand -base64 32
+.PHONY: generate_32_byte_symmetric_key
+
+retrieve_aws_secrets:
+	aws secretsmanager get-secret-value --secret-id simple_bank --query SecretString --output text | jq --raw-output 'to_entries|map("\(.key)=\(.value)")|.[]'
+.PHONY: retrieve_aws_secrets
