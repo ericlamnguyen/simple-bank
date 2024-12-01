@@ -34,14 +34,6 @@ migrate_down_1:
 	migrate -path ./db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 .PHONY: migrate_down_1
 
-rds_migrate_up:
-	migrate -path ./db/migration -database "postgres://root:b9b0m5srSGUsxuHnc7dk@simple-bank.cjowecmmsznh.us-east-1.rds.amazonaws.com:5432/simple_bank" -verbose up
-.PHONY: rds_migrate_up
-
-rds_migrate_down:
-	migrate -path ./db/migration -database "postgres://root:b9b0m5srSGUsxuHnc7dk@simple-bank.cjowecmmsznh.us-east-1.rds.amazonaws.com:5432/simple_bank" -verbose down
-.PHONY: rds_migrate_down
-
 test:
 	go test -count=1 ./...
 .PHONY: test
