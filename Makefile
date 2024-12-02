@@ -63,5 +63,9 @@ retrieve_aws_secrets:
 .PHONY: retrieve_aws_secrets
 
 docker_login_to_ECR:
-	aws ecr get-login-password | docker login --username AWS --password-stdin 273354660396.dkr.ecr.us-east-1.amazonaws.com
+	aws ecr get-login-password | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 .PHONY: docker_login_to_ECR
+
+docker_pull_from_ECR:
+	docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/simple-bank
+.PHONY: docker_pull_from_ECR

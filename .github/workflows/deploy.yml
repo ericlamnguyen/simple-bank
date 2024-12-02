@@ -44,6 +44,14 @@ jobs:
           REPOSITORY: simple-bank
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Build the Docker image with the version-specific tag
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+
+          # Tag the same image as "latest"
+          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:latest
+
+          # Push the version-specific tag
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+          # Push the "latest" tag
+          docker push $REGISTRY/$REPOSITORY:latest
