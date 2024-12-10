@@ -1,2 +1,4 @@
 .vscode/
 .envrc
+terraform/.terraform/
+terraform/.terraform.lock.hcl

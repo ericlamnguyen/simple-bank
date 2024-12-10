@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-bank-api-service
+  namespace: default # Optional, use "default" or a custom namespace
+spec:
+  type: LoadBalancer # Options: ClusterIP, NodePort, LoadBalancer, ExternalName
+  selector:
+    app: simple-bank-api # Match Pods with this label
+  ports:
+    - protocol: TCP
+      port: 80 # The port the Service exposes
+      targetPort: 8080 # The port on the Pods to forward traffic to
